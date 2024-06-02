@@ -68,6 +68,10 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create token"})
 		return
 	}
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600*720, "", "", true, true)
+
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenString,
 	})
