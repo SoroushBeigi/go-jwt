@@ -41,6 +41,10 @@ func Login(c *gin.Context) {
 		Phone    string
 		Password string
 	}
+	if c.Bind(&body) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read body"})
+		return
+	}
 	var user models.User
 	initializers.DB.First(&user, "phone = ?", body.Phone)
 	if user.ID == 0 {
