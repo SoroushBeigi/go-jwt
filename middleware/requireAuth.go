@@ -17,9 +17,11 @@ func RequireAuth(c *gin.Context) {
 	fmt.Println("In middleware!")
 	providedToken := c.Request.Header.Get("Authorization")
 	if providedToken == "" {
-		c.JSON(http.StatusUnauthorized,gin.H{"Unauthorized:":"Please provide a token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized:": "Please provide a token"})
 	}
 
+	providedToken = providedToken[7:]
+	print(providedToken)
 	token, err := jwt.Parse(providedToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			print(token)
@@ -35,17 +37,17 @@ func RequireAuth(c *gin.Context) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.JSON(http.StatusUnauthorized,gin.H{"Unauthorized:":"Token Expired"})
+			c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized:": "Token Expired"})
 		}
 		var user models.User
 		initializers.DB.First(&user, claims["sub"])
 		if user.ID == 0 {
-			c.JSON(http.StatusUnauthorized,gin.H{"Unauthorized:":"User not found"})
+			c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized:": "User not found"})
 		}
 		c.Set("user", user)
 		c.Next()
 	} else {
-		c.JSON(http.StatusUnauthorized,gin.H{"Unauthorized:":"Token invalid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized:": "Token invalid"})
 	}
 
 }
