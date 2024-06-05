@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -24,7 +23,6 @@ func RequireAuth(c *gin.Context) {
 	print(providedToken)
 	token, err := jwt.Parse(providedToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			print(token)
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("SECRET")), nil
@@ -32,7 +30,7 @@ func RequireAuth(c *gin.Context) {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized:": "Token invalid,"})
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
